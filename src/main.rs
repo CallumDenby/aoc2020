@@ -1,7 +1,9 @@
+#![feature(variant_count)]
+
 use std::fs;
 
 mod solutions;
-use solutions::day1;
+use solutions::{day1, day2};
 
 fn main() {
     let day = std::env::args()
@@ -15,6 +17,7 @@ fn main() {
 
     match day {
         1 => day1::solve(input),
+        2 => day2::solve(input),
         _ => eprintln!("Not implemented yet, don't be impatient!"),
     }
 }
