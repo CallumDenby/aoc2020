@@ -30,78 +30,41 @@ impl Shape {
     }
 }
 
-#[derive(Debug, PartialEq, Eq)]
-enum Result {
-    Win(Shape),
-    Lose(Shape),
-    Draw(Shape),
-}
-
-impl Result {
-    pub fn new(pair: (Shape, Shape)) -> Self {
-        let (input, response) = pair;
-        if input == response {
-            return Result::Draw(response);
-        }
-        if response == Shape::of(input as i32 + 1) {
-            return Result::Win(response);
-        }
-        return Result::Lose(response);
-    }
-    pub fn from(shape: Shape, result: &str) -> Option<Self> {
-        match result {
-            "X" => Some(Result::Lose(Shape::of(shape as i32 + 2))),
-            "Y" => Some(Result::Draw(shape)),
-            "Z" => Some(Result::Win(Shape::of(shape as i32 + 1))),
-            _ => None,
-        }
-    }
-    pub fn get_points(&self) -> i32 {
-        return match self {
-            Result::Win(res) => 6 + res.points(),
-            Result::Draw(res) => 3 + res.points(),
-            Result::Lose(res) => 0 + res.points(),
-        };
-    }
-}
+const WIN: i32 = 6;
+const DRAW: i32 = 3;
+const LOSE: i32 = 0;
 
 pub fn solve(input: String) {
-    part1(&input);
-    part2(&input);
-}
-
-fn part2(input: &String) {
-    let points: i32 = input
+    let (first, second) = input
         .trim()
         .split("\n")
-        .map(|round| {
-            let (first, res) = round
-                .split(" ")
-                .collect_tuple()
-                .expect("Invalid round entry");
-            let shape = Shape::new(first).expect("Unable to convert input to shape");
-            return Result::from(shape, res)
-                .expect("Unable to get result from shape")
-                .get_points();
-        })
-        .sum();
+        .map(|round| round.split(" ").collect_tuple().unwrap())
+        .fold((0, 0), |(one, two), curr| {
+            (one + part1(curr), two + part2(curr).unwrap_or(0))
+        });
 
-    println!("Total points from revised strategy guide {}", points);
+    println!("Part 1: {}", first);
+    println!("Part 2: {}", second);
 }
 
-fn part1(input: &String) {
-    let points: i32 = input
-        .trim()
-        .split("\n")
-        .map(|round| {
-            let split_round = round
-                .split(" ")
-                .map(|i| Shape::new(i).expect("Invalid shape type"))
-                .collect_tuple()
-                .expect("Invalid round entry");
-            return Result::new(split_round).get_points();
-        })
-        .sum();
+fn part1((first, second): (&str, &str)) -> i32 {
+    let input = Shape::new(first).unwrap();
+    let response = Shape::new(second).unwrap();
+    let draw = if input == response { DRAW } else { 0 };
+    let win = if response == Shape::of(input as i32 + 1) {
+        WIN
+    } else {
+        0
+    };
+    return draw + win + response.points();
+}
 
-    println!("Total points from strategy guide {}", points);
+fn part2((first, second): (&str, &str)) -> Option<i32> {
+    let input = Shape::new(first).unwrap();
+    match second {
+        "X" => Some(LOSE + Shape::of(input as i32 + 2).points()),
+        "Y" => Some(DRAW + input.points()),
+        "Z" => Some(WIN + Shape::of(input as i32 + 1).points()),
+        _ => None,
+    }
 }
