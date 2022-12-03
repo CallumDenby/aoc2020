@@ -40,10 +40,8 @@ fn part2(input: &Vec<Vec<char>>, alphabet: &HashMap<char, i32>) {
     let total_rucksacks: i32 = input
         .chunks(3)
         .into_iter()
-        .map(|mut chunk| {
-            let first: &Vec<char> = chunk.take_first().unwrap();
-            let second: &Vec<char> = chunk.take_first().unwrap();
-            let third: &Vec<char> = chunk.take_first().unwrap();
+        .map(|chunk| {
+            let (first, second, third) = chunk.iter().collect_tuple().unwrap();
             first
                 .iter()
                 .filter(|c| second.contains(*c) && third.contains(*c))
