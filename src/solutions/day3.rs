@@ -9,44 +9,46 @@ pub fn solve(input: String) {
         .map(|(first, second)| (second, (first + 1) as i32))
         .collect();
 
-    part1(&input, &alphabet);
-    part2(&input, &alphabet);
-}
-
-fn part1(input: &String, alphabet: &HashMap<char, i32>) {
-    let total_rucksacks: i32 = input
+    let prepared_input = input
         .trim()
         .lines()
+        .map(|line| line.chars().collect_vec())
+        .collect_vec();
+
+    part1(&prepared_input, &alphabet);
+    part2(&prepared_input, &alphabet);
+}
+
+fn part1(input: &Vec<Vec<char>>, alphabet: &HashMap<char, i32>) {
+    let total_rucksacks: i32 = input
+        .iter()
         .map(|rucksack| rucksack.split_at(rucksack.len() / 2))
         .map(|(first, second)| {
             first
-                .chars()
+                .iter()
                 .filter(|c| second.contains(*c))
                 .unique()
-                .collect_vec()
+                .map(|c| char_to_priority(&c, alphabet))
+                .sum::<i32>()
         })
-        .map(|dupes| duplicate_list_to_priority(dupes.to_vec(), alphabet))
         .sum();
 
     println!("P1 {:?}", total_rucksacks);
 }
 
-fn part2(input: &String, alphabet: &HashMap<char, i32>) {
+fn part2(input: &Vec<Vec<char>>, alphabet: &HashMap<char, i32>) {
     let total_rucksacks: i32 = input
-        .trim()
-        .lines()
         .chunks(3)
         .into_iter()
         .map(|mut chunk| {
-            let first: &str = chunk.next().unwrap();
-            let second: &str = chunk.next().unwrap();
-            let third: &str = chunk.next().unwrap();
+            let first: &Vec<char> = chunk.take_first().unwrap();
+            let second: &Vec<char> = chunk.take_first().unwrap();
+            let third: &Vec<char> = chunk.take_first().unwrap();
             first
-                .chars()
-                .filter(|c| second.contains(*c))
-                .filter(|c| third.contains(*c))
+                .iter()
+                .filter(|c| second.contains(*c) && third.contains(*c))
                 .unique()
-                .map(|c| char_to_priority(&c, &alphabet))
+                .map(|c| char_to_priority(&c, alphabet))
                 .sum::<i32>()
         })
         .sum();
@@ -54,10 +56,9 @@ fn part2(input: &String, alphabet: &HashMap<char, i32>) {
     println!("P2 {:?}", total_rucksacks);
 }
 
-fn duplicate_list_to_priority(list: Vec<char>, alphabet: &HashMap<char, i32>) -> i32 {
-    list.iter().map(|c| char_to_priority(c, alphabet)).sum()
-}
-
 fn char_to_priority(c: &char, alphabet: &HashMap<char, i32>) -> i32 {
-    alphabet.get(c).expect("").clone()
+    alphabet
+        .get(c)
+        .expect("Unable to convert key to priority")
+        .clone()
 }
