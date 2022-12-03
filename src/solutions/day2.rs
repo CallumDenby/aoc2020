@@ -1,4 +1,5 @@
 use itertools::Itertools;
+use rayon::prelude::*;
 
 #[derive(Debug, PartialEq, Eq, Copy, Clone)]
 enum Shape {
@@ -37,11 +38,13 @@ const LOSE: i32 = 0;
 pub fn solve(input: String) {
     let (first, second) = input
         .trim()
-        .split("\n")
-        .map(|round| round.split(" ").collect_tuple().unwrap())
-        .fold((0, 0), |(one, two), curr| {
-            (one + part1(curr), two + part2(curr).unwrap_or(0))
-        });
+        .par_lines()
+        .map(|round| round.split(" ").collect_tuple::<(&str, &str)>().unwrap())
+        .map(|curr| (part1(curr), part2(curr).unwrap_or(0)))
+        .reduce(
+            || (0, 0),
+            |(one, two), (first, second)| (one + first, two + second),
+        );
 
     println!("Part 1: {}", first);
     println!("Part 2: {}", second);

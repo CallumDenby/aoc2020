@@ -1,11 +1,14 @@
+use rayon::prelude::*;
+
 pub fn solve(input: String) {
     let mut elves = input
         .trim()
         .split("\n\n")
+        .par_bridge()
         .map(|elf| {
-            elf.split("\n")
+            elf.par_lines()
                 .map(|calorie| calorie.parse::<i32>().expect("Calorie not a number"))
-                .fold(0, |acc, x| acc + x)
+                .reduce(|| 0, |acc, x| acc + x)
         })
         .collect::<Vec<i32>>();
 
@@ -22,7 +25,11 @@ fn part1(elves: &Vec<i32>) {
 }
 
 fn part2(elves: &Vec<i32>) {
-    let elf: i32 = elves.iter().rev().take(3).sum();
+    let elf: i32 = elves.clone().iter().rev().take(3).sum();
 
+    println!(
+        "Top 3 {:?}",
+        elves.clone().iter().rev().take(5).collect::<Vec<&i32>>()
+    );
     println!("Total Calories for Highest 3 Elves: {}", elf)
 }
