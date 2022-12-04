@@ -20,6 +20,7 @@ fn main() {
         1 => day1::solve(input),
         2 => day2::solve(input),
         3 => day3::solve(input),
+        4 => day4::solve(input),
         _ => eprintln!("Not implemented yet, don't be impatient!"),
     }
 }
